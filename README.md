@@ -151,6 +151,24 @@ python scripts/open_data_ai4i.py              # also ask the LLM for hypotheses 
 
 Both commands rewrite `runs/open_data_ai4i.json` and `runs/open_data_ai4i.md`. `--download` leaves out the hypothesis and verdict sections. The CSV is written to `data/open/ai4i2020.csv`, which is gitignored.
 
+## Deployment
+
+Cloudflare Workers is the planned deploy target. It is not configured yet, and this repository is not deployed there. There is no `wrangler.toml`, no Worker entry point, and no Worker name, binding, or secret.
+
+A JavaScript or TypeScript Worker is deployed with:
+
+```bash
+npx wrangler deploy
+```
+
+A [Python Worker](https://developers.cloudflare.com/workers/languages/python/) is deployed with `uv run pywrangler deploy` and needs the `python_workers` compatibility flag. Either path still needs a `wrangler.toml` and a Worker entry point.
+
+The current app is a set of long-running local processes (FastAPI, SQLite at `runs/forgemind.sqlite`, an in-process WebSocket fanout, and a stall watchdog). A realistic Workers slice is the static dashboard and a request-scoped event-log API, after the log moves off the local SQLite file. These stay on the machine with the hardware:
+
+- camera perception (OpenCV capture from USB, RTSP, HTTP MJPEG, or MP4)
+- the LLM and VLM servers
+- the arm service (`MockArm`, `HumanArm`, or the `RealArm` stub)
+
 ## Documentation
 
 - [Core service guide](docs/CORE.md): API, environment variables, token guard
